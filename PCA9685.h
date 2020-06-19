@@ -3,7 +3,7 @@
 //    FILE: PCA9685.H
 //  AUTHOR: Rob Tillaart
 //    DATE: 24-apr-2016
-// VERSION: 0.2.0
+// VERSION: 0.2.1
 // PURPOSE: Arduino library for I2C PCA9685 16 channel PWM 
 //     URL: https://github.com/RobTillaart/PCA9685_RT
 //
@@ -13,7 +13,7 @@
 
 #include "Arduino.h"
 
-#define PCA9685_LIB_VERSION "0.2.0"
+#define PCA9685_LIB_VERSION "0.2.1"
 
 // ERROR CODES
 #define PCA9685_OK          0x00
