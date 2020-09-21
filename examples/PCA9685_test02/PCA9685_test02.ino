@@ -2,7 +2,7 @@
 //    FILE: PCA9685_test02.ino
 //  AUTHOR: Rob Tillaart
 //    DATE: 24-APR-2016
-// VERSION: 0.1.0
+// VERSION: 0.1.1
 // PUPROSE: test PCA9685 library
 //
 
@@ -93,13 +93,24 @@ void testFrequency()
   Serial.println(__FUNCTION__);
 
   ledArray.setPWM(0, 1000, 3000);
-  for (uint16_t freq = 24; freq < 2000; freq *= 2)
+  for (uint16_t freq = 12; freq < 2000; freq *= 2)
   {
-    Serial.println(freq);
+    Serial.print(freq);
     ledArray.setFrequency(freq);
+    // if freq is out of range => report
+    if (ledArray.getFrequency() != freq)
+    {
+      Serial.print("\tconstrained to : ");
+      Serial.println(ledArray.getFrequency());
+    }
+    else
+    {
+      Serial.println("\tOK");
+    }
     delay(2000);
   }
   ledArray.setOFF(0);
+  Serial.println();
 }
 
 
@@ -107,3 +118,5 @@ void loop()
 {
   //testPWM(0);
 }
+
+// -- END OF FILE --
