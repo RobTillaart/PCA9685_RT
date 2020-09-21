@@ -2,7 +2,7 @@
 //    FILE: PCA9685.cpp
 //  AUTHOR: Rob Tillaart
 //    DATE: 24-apr-2016
-// VERSION: 0.2.1
+// VERSION: 0.2.2
 // PURPOSE: Arduino library for I2C PCA9685 16 channel PWM 
 //     URL: https://github.com/RobTillaart/PCA9685_RT
 //
@@ -11,6 +11,7 @@
 // 0.1.1  2019-01-30  testing && fixing
 // 0.2.0  2020-05-25  refactor; ESP32 begin(sda,scl)
 // 0.2.1  2020-06-19  fix library.json
+// 0.2.2  2020-09-21  fix #1 + add getFrequency()
 
 #include <Wire.h>
 #include "PCA9685.h"
@@ -152,12 +153,13 @@ void PCA9685::getPWM(uint8_t channel, uint16_t* onTime, uint16_t* offTime)
 // set update frequency for all channels
 void PCA9685::setFrequency(uint16_t freq)
 {
-  if (freq < 24) freq = 24;
-  if (freq > 1526) freq = 1526;
+  _freq = freq;
+  if (_freq < 24) _freq = 24;       // page 25 datasheet
+  if (_freq > 1526) _freq = 1526;
   // removed float operation for speed
   // faster but equal accurate
   // uint8_t scaler = round(25e6 / (freq * 4096)) - 1;
-  uint8_t scaler = 28828 / (freq * 8) - 1;
+  uint8_t scaler = 48828 / (_freq * 8) - 1;
   writeReg(PCA9685_PRE_SCALE, scaler);
 }
 

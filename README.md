@@ -41,6 +41,10 @@ channels do not need to start at the same moment with HIGH.
 
 **setFrequency(freq)** set the update speed of the channels. 
 This is for all channels at once.
+The frequency is constrained to be between 24 and 1526 Hz,
+
+**getFrequency()** get the current update frequency of the channels. 
+This is same for all channels.
 
 **digitalWrite(channel, mode)** mode = HIGH or LOW, just use the PCA9685 as 
 a digitalpin. 
