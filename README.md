@@ -5,13 +5,16 @@ Arduino library for I2C PCA9685 16 channel PWM extender
 # Description
 
 This library is to control the I2C PCA9685 PWM extender. 
-The 16 channels are independently configurable is steps of 1/4096.
-this allows for better than 0.1% finetuning of the duty-cycle
-of the PWM signal. Furthermore the PWM's of the different signals
-have individual start and stop moments. This can be used to distribute the
-power more evenly over multiple servo's or give special effects when  
-used in an RGB LED.
+The 16 channels are independently configurable in steps of 1/4096.
+This allows for better than 0.1% finetuning of the duty-cycle
+of the PWM signal. 
 
+The PWM's of the different channels have individual start and stop moments. 
+This can be used to distribute the power more evenly over multiple servo's 
+or give special effects when used in an RGB LED.
+
+The frequency of the PWM can be set from 24 to 1526 according to the datasheet, however in practice not all frequencies are set accurate.
+Lower frequencies do better than higher frequencies.
 
 
 ### interface
@@ -39,19 +42,37 @@ channels do not need to start at the same moment with HIGH.
 
 **getPWM(channel, ontime, offtime)** read back the configuration of the channel.
 
-**setFrequency(freq)** set the update speed of the channels. 
-This is for all channels at once.
-The frequency is constrained to be between 24 and 1526 Hz,
+**setFrequency(freq, int offset = 0)** set the update speed of the channels. 
+This value is set the same for all channels at once.
+The frequency is constrained to be between 24 and 1526 Hz.
+As the frequency is converted to an 8 bit **prescaler**,
+the frequency set will seldom be exact.
+After changing the frequency, one must set all channels (again), 
+so one should set the frequency in **setup()**
 
-**getFrequency()** get the current update frequency of the channels. 
-This is same for all channels.
+The parameter offset can be used to tune the **prescaler** to get a frequency
+closer to the requested value. See **PCA9685_setFrequency_offset** example. 
+Default the offset = 0. As the prescaler is smaller at higher frequencies 
+higher frequencies are less accurate.
+Making offset too large can result in very incorrect frequencies.
+
+When using offset, the **getFrequency(false)** will return the adjusted prescaler.
+
+**getFrequency(cache = true)** get the current update frequency of the channels. 
+This is same for all channels. If cache is false, the frequency is fetched and
+calculated from the **prescaler** register and will probably differ from the 
+value set with **setFrequency()**.
 
 **digitalWrite(channel, mode)** mode = HIGH or LOW, just use the PCA9685 as 
 a digitalpin. 
 This single function replaces the setON() and setOFF() that will become
 obsolete in the future.
 
-**lastERror()** returns **PCA9685_OK = 0** if all is OK, and 
+**allOFF()** switches all PWM channels OFF. **Experimental** in 0.3.0
+To "undo" the allOFF one can call the **reset()** function and set all 
+PWM channels again.
+
+**lastError()** returns **PCA9685_OK = 0** if all is OK, and 
 
 | Error code | Value | Description |
 |:----|:----:|:----|
@@ -59,7 +80,7 @@ obsolete in the future.
 | PCA9685_ERROR       | 0xFF | generic error
 | PCA9685_ERR_CHANNEL | 0xFE | Channel out of range
 | PCA9685_ERR_MODE    | 0xFD | Invalid mode register chosen | 
-| PCA9685_ERR_I2C     | 0xFF | PCA9685 I2C communication error
+| PCA9685_ERR_I2C     | 0xFC | PCA9685 I2C communication error
 
 
 

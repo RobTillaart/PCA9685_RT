@@ -2,12 +2,11 @@
 //    FILE: PCA9685_test02.ino
 //  AUTHOR: Rob Tillaart
 //    DATE: 24-APR-2016
-// VERSION: 0.1.1
+// VERSION: 0.1.2
 // PUPROSE: test PCA9685 library
 //
 
 #include "PCA9685.h"
-#include <Wire.h>
 
 PCA9685 ledArray(0x40);
 
