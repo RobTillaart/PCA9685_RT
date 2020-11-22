@@ -3,7 +3,7 @@
 //    FILE: PCA9685.H
 //  AUTHOR: Rob Tillaart
 //    DATE: 24-apr-2016
-// VERSION: 0.2.2
+// VERSION: 0.3.0
 // PURPOSE: Arduino library for I2C PCA9685 16 channel PWM 
 //     URL: https://github.com/RobTillaart/PCA9685_RT
 //
@@ -12,8 +12,9 @@
 //
 
 #include "Arduino.h"
+#include "Wire.h"
 
-#define PCA9685_LIB_VERSION "0.2.2"
+#define PCA9685_LIB_VERSION "0.3.0"
 
 // ERROR CODES
 #define PCA9685_OK          0x00
@@ -49,8 +50,10 @@ public:
 
   // set update frequency for all channels
   // freq = 24 - 1526 Hz
-  void    setFrequency(uint16_t freq);
-  int     getFrequency() { return _freq; };
+  // note: as the frequency is converted to an 8 bit prescaler
+  //       the frequency set will seldom be exact, but best effort.
+  void    setFrequency(uint16_t freq, int offset = 0);
+  int     getFrequency(bool cache = true);
 
   // set channel  HIGH or LOW (effectively no PWM)
   void    digitalWrite(uint8_t channel, uint8_t mode);
@@ -58,6 +61,9 @@ public:
   // for backwards compatibility; will be removed in future
   void    setON(uint8_t channel)   { digitalWrite(channel, HIGH); };
   void    setOFF(uint8_t channel)  { digitalWrite(channel, LOW); };
+
+  // experimental for 0.3.0
+  void    allOFF();
 
   int     lastError();
 
