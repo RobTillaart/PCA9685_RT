@@ -2,18 +2,19 @@
 //    FILE: PCA9685.cpp
 //  AUTHOR: Rob Tillaart
 //    DATE: 24-apr-2016
-// VERSION: 0.3.0
+// VERSION: 0.3.1
 // PURPOSE: Arduino library for I2C PCA9685 16 channel PWM 
 //     URL: https://github.com/RobTillaart/PCA9685_RT
 //
-// HISTORY:
-// 0.1.0  2016-04-24  initial BETA version
-// 0.1.1  2019-01-30  testing && fixing
-// 0.2.0  2020-05-25  refactor; ESP32 begin(sda,scl)
-// 0.2.1  2020-06-19  fix library.json
-// 0.2.2  2020-09-21  fix #1 + add getFrequency()
-// 0.2.3  2020-11-21  fix digitalWrite (internal version only)
-// 0.3.0  2020-11-22  fix setting frequency
+//  HISTORY:
+//  0.1.0  2016-04-24  initial BETA version
+//  0.1.1  2019-01-30  testing && fixing
+//  0.2.0  2020-05-25  refactor; ESP32 begin(sda,scl)
+//  0.2.1  2020-06-19  fix library.json
+//  0.2.2  2020-09-21  fix #1 + add getFrequency()
+//  0.2.3  2020-11-21  fix digitalWrite (internal version only)
+//  0.3.0  2020-11-22  fix setting frequency
+//  0.3.1  2021-01-05  arduino-CI + unit test
 
 
 #include "PCA9685.h"
@@ -71,18 +72,32 @@ PCA9685::PCA9685(const uint8_t deviceAddress)
 
 
 #if defined (ESP8266) || defined(ESP32)
-void PCA9685::begin(uint8_t sda, uint8_t scl)
+bool PCA9685::begin(uint8_t sda, uint8_t scl)
 {
   Wire.begin(sda, scl);
+  if (! isConnected()) return false;
   reset();
+  return true;
 }
 #endif
 
-void PCA9685::begin()
+
+bool PCA9685::begin()
 {
   Wire.begin();
+  if (! isConnected()) return false;
   reset();
+  return true;
 }
+
+
+bool PCA9685::isConnected()
+{
+  Wire.beginTransmission(_address);
+  _error = Wire.endTransmission();
+  return (_error == 0);
+}
+
 
 void PCA9685::reset()
 {
@@ -178,6 +193,7 @@ void PCA9685::setFrequency(uint16_t freq, int offset)
   writeMode(PCA9685_MODE1, mode1);
 }
 
+
 int PCA9685::getFrequency(bool cache)
 {
   if (cache) return _freq;
@@ -204,10 +220,12 @@ void PCA9685::digitalWrite(uint8_t channel, uint8_t mode)
   else writeReg2(reg, 0x0000, 0x0000);
 }
 
+
 void PCA9685::allOFF()
 {
   writeReg(PCA9685_ALL_OFF_H, 0x10);
 }
+
 
 int PCA9685::lastError()
 {
@@ -215,6 +233,7 @@ int PCA9685::lastError()
   _error = 0;
   return e;
 }
+
 
 //////////////////////////////////////////////////////////////
 //

@@ -6,8 +6,9 @@
 // PUPROSE: test PCA9685 library
 //
 
+
 #include "PCA9685.h"
-#include <Wire.h>
+
 
 PCA9685 ledArray(0x20);
 
