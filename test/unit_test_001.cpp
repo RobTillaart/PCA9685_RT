@@ -59,7 +59,7 @@ unittest(test_constructor)
 
 unittest(test_TODO)
 {
-  PCA9635 ledArray(0x20);
+  PCA9685 ledArray(0x20);
   assertTrue(ledArray.begin());
 
   // TODO
