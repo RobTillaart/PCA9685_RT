@@ -3,7 +3,7 @@
 //    FILE: PCA9685.H
 //  AUTHOR: Rob Tillaart
 //    DATE: 24-apr-2016
-// VERSION: 0.3.0
+// VERSION: 0.3.1
 // PURPOSE: Arduino library for I2C PCA9685 16 channel PWM 
 //     URL: https://github.com/RobTillaart/PCA9685_RT
 //
@@ -11,17 +11,19 @@
 // see PCA9685.cpp file
 //
 
+
 #include "Arduino.h"
 #include "Wire.h"
 
-#define PCA9685_LIB_VERSION "0.3.0"
+
+#define PCA9685_LIB_VERSION       (F("0.3.1"))
 
 // ERROR CODES
-#define PCA9685_OK          0x00
-#define PCA9685_ERROR       0xFF
-#define PCA9685_ERR_CHANNEL 0xFE
-#define PCA9685_ERR_MODE    0xFD
-#define PCA9685_ERR_I2C     0xFC
+#define PCA9685_OK                0x00
+#define PCA9685_ERROR             0xFF
+#define PCA9685_ERR_CHANNEL       0xFE
+#define PCA9685_ERR_MODE          0xFD
+#define PCA9685_ERR_I2C           0xFC
 
 
 class PCA9685
@@ -30,11 +32,12 @@ public:
   explicit PCA9685(const uint8_t deviceAddress);
 
 #if defined (ESP8266) || defined(ESP32)
-  void    begin(uint8_t sda, uint8_t scl);
+  bool    begin(uint8_t sda, uint8_t scl);
 #endif
-  void    begin();
+  bool    begin();
   void    reset();
-
+  bool    isConnected();
+  
   // reg = 1, 2  check datasheet for values
   void    writeMode(uint8_t reg, uint8_t value);
   uint8_t readMode(uint8_t reg);
