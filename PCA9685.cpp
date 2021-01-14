@@ -2,7 +2,7 @@
 //    FILE: PCA9685.cpp
 //  AUTHOR: Rob Tillaart
 //    DATE: 24-apr-2016
-// VERSION: 0.3.1
+// VERSION: 0.3.2
 // PURPOSE: Arduino library for I2C PCA9685 16 channel PWM 
 //     URL: https://github.com/RobTillaart/PCA9685_RT
 //
@@ -15,6 +15,7 @@
 //  0.2.3  2020-11-21  fix digitalWrite (internal version only)
 //  0.3.0  2020-11-22  fix setting frequency
 //  0.3.1  2021-01-05  arduino-CI + unit test
+//  0.3.2  2021-01-14  WireN support
 
 
 #include "PCA9685.h"
@@ -64,17 +65,24 @@
 //
 // Constructor
 //
-PCA9685::PCA9685(const uint8_t deviceAddress)
+PCA9685::PCA9685(const uint8_t deviceAddress, TwoWire *wire)
 {
   _address = deviceAddress;
-  _error = 0;
+  _wire    = wire;
+  _error   = 0;
 }
 
 
 #if defined (ESP8266) || defined(ESP32)
 bool PCA9685::begin(uint8_t sda, uint8_t scl)
 {
-  Wire.begin(sda, scl);
+  _wire = &Wire;
+  if ((sda < 255) && (scl < 255))
+  {
+    _wire->begin(sda, scl);
+  } else {
+    _wire->begin();
+  }
   if (! isConnected()) return false;
   reset();
   return true;
@@ -84,7 +92,7 @@ bool PCA9685::begin(uint8_t sda, uint8_t scl)
 
 bool PCA9685::begin()
 {
-  Wire.begin();
+  _wire->begin();
   if (! isConnected()) return false;
   reset();
   return true;
@@ -93,15 +101,15 @@ bool PCA9685::begin()
 
 bool PCA9685::isConnected()
 {
-  Wire.beginTransmission(_address);
-  _error = Wire.endTransmission();
+  _wire->beginTransmission(_address);
+  _error = _wire->endTransmission();
   return (_error == 0);
 }
 
 
 void PCA9685::reset()
 {
-  _error = 0;
+  _error = PCA9685_OK;
   writeMode(PCA9685_MODE1, PCA9685_AUTOINCR | PCA9685_ALLCALL);
   writeMode(PCA9685_MODE2, PCA9685_OUTDRV);
 }
@@ -109,6 +117,7 @@ void PCA9685::reset()
 
 void PCA9685::writeMode(uint8_t reg, uint8_t value)
 {
+  _error = PCA9685_OK;
   if ((reg != PCA9685_MODE1) && (reg != PCA9685_MODE2))
   {
     _error = PCA9685_ERR_MODE;
@@ -120,6 +129,7 @@ void PCA9685::writeMode(uint8_t reg, uint8_t value)
 
 uint8_t PCA9685::readMode(uint8_t reg)
 {
+  _error = PCA9685_OK;
   if ((reg != PCA9685_MODE1) && (reg != PCA9685_MODE2))
   {
     _error = PCA9685_ERR_MODE;
@@ -133,6 +143,7 @@ uint8_t PCA9685::readMode(uint8_t reg)
 // write value to single PWM channel
 void PCA9685::setPWM(uint8_t channel, uint16_t onTime, uint16_t offTime)
 {
+  _error = PCA9685_OK;
   if (channel > 15)
   {
     _error = PCA9685_ERR_CHANNEL;
@@ -154,30 +165,32 @@ void PCA9685::setPWM(uint8_t channel, uint16_t offTime)
 // read value from single PWM channel
 void PCA9685::getPWM(uint8_t channel, uint16_t* onTime, uint16_t* offTime)
 {
+  _error = PCA9685_OK;
   if (channel > 15)
   {
     _error = PCA9685_ERR_CHANNEL;
     return;
   }
   uint8_t reg = PCA9685_CHANNEL_0 + (channel << 2);
-  Wire.beginTransmission(_address);
-  Wire.write(reg);
-  _error = Wire.endTransmission();
-  if (Wire.requestFrom(_address, (uint8_t)4) != 4)
+  _wire->beginTransmission(_address);
+  _wire->write(reg);
+  _error = _wire->endTransmission();
+  if (_wire->requestFrom(_address, (uint8_t)4) != 4)
   {
     _error = PCA9685_ERR_I2C;
     return;
   }
-  uint16_t _data = Wire.read();
-  *onTime = (Wire.read() * 256) + _data;
-  _data = Wire.read();
-  *offTime = (Wire.read() * 256) + _data;
+  uint16_t _data = _wire->read();
+  *onTime = (_wire->read() * 256) + _data;
+  _data = _wire->read();
+  *offTime = (_wire->read() * 256) + _data;
 }
 
 
 // set update frequency for all channels
 void PCA9685::setFrequency(uint16_t freq, int offset)
 {
+  _error = PCA9685_OK;
   _freq = freq;
   if (_freq < 24) _freq = 24;       // page 25 datasheet
   if (_freq > 1526) _freq = 1526;
@@ -196,6 +209,7 @@ void PCA9685::setFrequency(uint16_t freq, int offset)
 
 int PCA9685::getFrequency(bool cache)
 {
+  _error = PCA9685_OK;
   if (cache) return _freq;
   uint8_t scaler = readReg(PCA9685_PRE_SCALER);
   scaler++;
@@ -210,6 +224,7 @@ int PCA9685::getFrequency(bool cache)
 // in OFF mode it doesn't matter.
 void PCA9685::digitalWrite(uint8_t channel, uint8_t mode)
 {
+  _error = PCA9685_OK;
   if (channel > 15)
   {
     _error = PCA9685_ERR_CHANNEL;
@@ -223,6 +238,7 @@ void PCA9685::digitalWrite(uint8_t channel, uint8_t mode)
 
 void PCA9685::allOFF()
 {
+  _error = PCA9685_OK;
   writeReg(PCA9685_ALL_OFF_H, 0x10);
 }
 
@@ -241,36 +257,36 @@ int PCA9685::lastError()
 //
 void PCA9685::writeReg(uint8_t reg, uint8_t value)
 {
-  Wire.beginTransmission(_address);
-  Wire.write(reg);
-  Wire.write(value);
-  _error = Wire.endTransmission();
+  _wire->beginTransmission(_address);
+  _wire->write(reg);
+  _wire->write(value);
+  _error = _wire->endTransmission();
 }
 
 
 void PCA9685::writeReg2(uint8_t reg, uint16_t a, uint16_t b)
 {
-  Wire.beginTransmission(_address);
-  Wire.write(reg);
-  Wire.write(a & 0xFF);
-  Wire.write((a >> 8) & 0x1F);
-  Wire.write(b & 0xFF);
-  Wire.write((b >> 8) & 0x1F);
-  _error = Wire.endTransmission();
+  _wire->beginTransmission(_address);
+  _wire->write(reg);
+  _wire->write(a & 0xFF);
+  _wire->write((a >> 8) & 0x1F);
+  _wire->write(b & 0xFF);
+  _wire->write((b >> 8) & 0x1F);
+  _error = _wire->endTransmission();
 }
 
 
 uint8_t PCA9685::readReg(uint8_t reg)
 {
-  Wire.beginTransmission(_address);
-  Wire.write(reg);
-  _error = Wire.endTransmission();
-  if (Wire.requestFrom(_address, (uint8_t)1) != 1)
+  _wire->beginTransmission(_address);
+  _wire->write(reg);
+  _error = _wire->endTransmission();
+  if (_wire->requestFrom(_address, (uint8_t)1) != 1)
   {
     _error = PCA9685_ERR_I2C;
     return 0;
   }
-  uint8_t _data = Wire.read();
+  uint8_t _data = _wire->read();
   return _data;
 }
 
