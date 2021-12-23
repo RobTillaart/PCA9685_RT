@@ -31,7 +31,7 @@ Lower frequencies do better than higher frequencies.
 
 ### Constructor
 
-- **PCA9635(uint8_t deviceAddress)** I2C address
+- **PCA9685(uint8_t deviceAddress, TwoWire \* wire = &Wire)** I2C address + optional I2C interface.
 - **bool begin()** initializes the library after startup. Mandatory.
 - **bool begin(uint8_t sda, uint8_t scl)** idem, ESP32 ESP8266 only. 
 Library does not support multiple Wire instances (yet).
@@ -99,8 +99,8 @@ When using offset, the **getFrequency(false)** will return the adjusted **preSca
 | PCA9685_OK          | 0x00  | Everything went well
 | PCA9685_ERROR       | 0xFF  | generic error
 | PCA9685_ERR_CHANNEL | 0xFE  | Channel out of range
-| PCA9685_ERR_MODE    | 0xFD  | Invalid mode register chosen | 
-| PCA9685_ERR_I2C     | 0xFC  | PCA9685 I2C communication error
+| PCA9685_ERR_MODE    | 0xFD  | Invalid mode register chosen    | 
+| PCA9685_ERR_I2C     | 0xFC  | PCA9685 I2C communication error |
 
 
 ## Operation
@@ -112,7 +112,6 @@ See examples
 
 - improve documentation
 - add unit tests (if possible)
-- multiple Wire support (e.g. PCF8574)
 - investigate set/getFrequency int vs uint16_t ?
 -
 
