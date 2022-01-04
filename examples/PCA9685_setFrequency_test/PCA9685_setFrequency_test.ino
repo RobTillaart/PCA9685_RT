@@ -35,8 +35,8 @@ void setup()
   pinMode(IRQ_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(IRQ_PIN), irq, RISING);  // CHANGE
 
-  PCA.setFrequency(24);
-  PCA.setPWM(15, 0, 4095);    // gives 2 changes per interval
+  PCA.setFrequency(PCA9685_MIN_FREQ);   // == 24
+  PCA.setPWM(15, 0, 4095);              // gives 2 changes per interval
 
   Serial.println("\nSET\tGET\tGET%\tIRQ\tIRQ%");
 }
@@ -73,7 +73,7 @@ void loop()
     Serial.print("\n");
 
     freq += 4;
-    if (freq >= 1526) freq = 24;
+    if (freq >= 1526) freq = 24;  //  page 25 datasheet; PCA9685_MAX_FREQ, PCA9685_MIN_FREQ
     PCA.setFrequency(freq);
     PCA.setPWM(15, 0, 4095);
 
