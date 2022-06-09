@@ -87,16 +87,16 @@ These constants makes it easier to set modes without using a non descriptive
 bit mask. The constants can be merged by OR-ing them together, see snippet:
 
 ```cpp
-ledArray.writeMode(PCA9634_MODE2, 0b00110100);
+ledArray.writeMode(PCA9685_MODE2, 0b00110100);
 
 // would become
 
-uint8_t mode2_mask = PCA9634_MODE2_BLINK | PCA9634_MODE2_INVERT | PCA9634_MODE2_TOTEMPOLE;
-ledArray.writeMode(PCA9634_MODE2, mode2_mask);
+uint8_t mode2_mask = PCA9685_MODE2_BLINK | PCA9685_MODE2_INVERT | PCA9685_MODE2_TOTEMPOLE;
+ledArray.writeMode(PCA9685_MODE2, mode2_mask);
 
 // or even
 
-ledArray.setMode2(PCA9634_MODE2_BLINK | PCA9634_MODE2_INVERT | PCA9634_MODE2_TOTEMPOLE);
+ledArray.setMode2(PCA9685_MODE2_BLINK | PCA9685_MODE2_INVERT | PCA9685_MODE2_TOTEMPOLE);
 
 ```
 
