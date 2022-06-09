@@ -61,7 +61,7 @@ unittest(test_constants)
   assertEqual(PCA9685_ALL_OFF_H     , 0xFD);
 
   assertEqual(PCA9685_PRE_SCALER    , 0xFE);
-  assertEqual(PCA9685_PRE_SCALER    , 0xFF);
+  assertEqual(PCA9685_TESTMODE      , 0xFF);
 
 
   fprintf(stderr, "\nerrorcodes");
