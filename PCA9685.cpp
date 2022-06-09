@@ -43,7 +43,7 @@ PCA9685::PCA9685(const uint8_t deviceAddress, TwoWire *wire)
   _address      = deviceAddress;
   _wire         = wire;
   _channelCount = 16;
-  _error        = 0;
+  _error        = PCA9685_OK;
 }
 
 
@@ -222,7 +222,7 @@ void PCA9685::allOFF()
 int PCA9685::lastError()
 {
   int e = _error;
-  _error = 0;
+  _error = PCA9685_OK;
   return e;
 }
 
