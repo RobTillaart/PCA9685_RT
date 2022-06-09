@@ -110,7 +110,7 @@ public:
 
   // set update frequency for all channels
   // freq = 24 - 1526 Hz
-  // note: as the frequency is converted to an 8 bit prescaler
+  // note: as the frequency is converted to an 8 bit pre-scaler
   //       the frequency set will seldom be exact, but best effort.
   void     setFrequency(uint16_t freq, int offset = 0);
   int      getFrequency(bool cache = true);

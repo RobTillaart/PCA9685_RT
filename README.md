@@ -34,10 +34,10 @@ Lower frequencies do better than higher frequencies.
 
 - **PCA9685(uint8_t deviceAddress, TwoWire \* wire = &Wire)** Constructor with I2C device address, 
 and optional the Wire interface as parameter.
-- **bool begin(uint8_t mode1_mask = PCA9685_MODE1_ALLCALL, uint8_t mode2_mask = PCA9685_MODE2_NONE)** 
+- **bool begin(uint8_t mode1_mask = PCA9685_MODE1_AUTOINCR | PCA9685_MODE1_ALLCALL, uint8_t mode2_mask = PCA9685_MODE2_TOTEMPOLE)** 
 initializes the library after startup. Optionally setting the MODE1 and MODE2 configuration registers. 
 See PCA9685.h and datasheet for settings possible.
-- **bool begin(uint8_t sda, uint8_t scl, uint8_t mode1_mask = PCA9685_MODE1_ALLCALL, uint8_t mode2_mask = PCA9685_MODE2_NONE)** 
+- **bool begin(uint8_t sda, uint8_t scl, uint8_t mode1_mask = PCA9685_MODE1_AUTOINCR | PCA9685_MODE1_ALLCALL, uint8_t mode2_mask = PCA9685_MODE2_TOTEMPOLE)** 
 idem, ESP32 ESP8266 only. 
 - **void configure(uint8_t mode1_mask, uint8_t mode2_mask)** 
 To configure the library after startup one can set the MODE1 and MODE2 configuration registers. 
@@ -207,7 +207,8 @@ See examples
 
 - improve documentation
 - add unit tests (if possible)
-- investigate set/getFrequency int vs uint16_t ?
+- investigate int vs uint16_t ?
+  - **set/getFrequency() and \_freq*
 - sync with PCA9634/35/85 where possible
   - error handling?
 - investigate **PCA9685_TESTMODE**

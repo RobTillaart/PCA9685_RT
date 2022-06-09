@@ -171,7 +171,7 @@ void PCA9685::setFrequency(uint16_t freq, int offset)
   if (_freq < PCA9685_MIN_FREQ) _freq = PCA9685_MIN_FREQ;
   if (_freq > PCA9685_MAX_FREQ) _freq = PCA9685_MAX_FREQ;
   // removed float operation for speed
-  // faster but equal accurate
+  // faster and equal accurate
   // uint8_t scaler = round(25e6 / (_freq * 4096)) - 1;
   uint8_t scaler = 48828 / (_freq * 8) - 1;
 
@@ -183,6 +183,8 @@ void PCA9685::setFrequency(uint16_t freq, int offset)
 }
 
 
+//  returns the actual used frequency.
+//  therefore it does not use offset
 int PCA9685::getFrequency(bool cache)
 {
   _error = PCA9685_OK;
