@@ -162,7 +162,7 @@ When using offset, the **getFrequency(false)** will return the adjusted **preSca
 
 Please read the datasheet to understand the working of **SUB CALL** and **ALL CALL**.
 
-Since version 0.2.0 there is (experimental) support for the **SUB CALL** and **ALL CALL** functions.
+Since version 0.4.0 there is (experimental) support for the **SUB CALL** and **ALL CALL** functions.
 It needs more testing and if there are issues, please report.
 
 AllCall is automatically activated for each device on startup.
