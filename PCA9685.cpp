@@ -9,21 +9,24 @@
 //  HISTORY:
 //  0.1.0  2016-04-24  initial BETA version
 //  0.1.1  2019-01-30  testing && fixing
+
 //  0.2.0  2020-05-25  refactor; ESP32 begin(sda,scl)
 //  0.2.1  2020-06-19  fix library.json
 //  0.2.2  2020-09-21  fix #1 + add getFrequency()
 //  0.2.3  2020-11-21  fix digitalWrite (internal version only)
+
 //  0.3.0  2020-11-22  fix setting frequency
 //  0.3.1  2021-01-05  Arduino-CI + unit test
 //  0.3.2  2021-01-14  WireN support
 //  0.3.3  2021-12-23  update library.json, license, readme, minor edits
 //  0.3.4  2022-01-03  add channelCount()
+
 //  0.4.0  2022-06-09  breaking changes (sync with pca9634)
 //                      rename reset() to configure()
 //                      add mode1 and mode2 parameter to configure.
 //                      add SUB CALL and ALL CALL functions.
 //                      update documentation.
-//                      renamed PCA9634_MODE2_STOP to PCA9634_MODE2_ACK
+//                      renamed PCA9685_MODE2_STOP to PCA9685_MODE2_ACK
 //                      add mode parameters to begin()
 
 
@@ -222,6 +225,107 @@ int PCA9685::lastError()
   _error = 0;
   return e;
 }
+
+
+/////////////////////////////////////////////////////
+//
+// SUB CALL  -   ALL CALL
+//
+bool PCA9685::enableSubCall(uint8_t nr)
+{
+  if ((nr == 0) || (nr > 3)) return false;
+  uint8_t prev = getMode1();
+  uint8_t reg = prev;
+  if (nr == 1)      reg |= PCA9685_MODE1_SUB1;
+  else if (nr == 2) reg |= PCA9685_MODE1_SUB2;
+  else              reg |= PCA9685_MODE1_SUB3;
+  //  only update if changed.
+  if (reg != prev) setMode1(reg);
+  return true;
+}
+
+
+bool PCA9685::disableSubCall(uint8_t nr)
+{
+  if ((nr == 0) || (nr > 3)) return false;
+  uint8_t prev = getMode1();
+  uint8_t reg = prev;
+  if (nr == 1)      reg &= ~PCA9685_MODE1_SUB1;
+  else if (nr == 2) reg &= ~PCA9685_MODE1_SUB2;
+  else              reg &= ~PCA9685_MODE1_SUB3;
+  //  only update if changed.
+  if (reg != prev) setMode1(reg);
+  return true;
+}
+
+
+bool PCA9685::isEnabledSubCall(uint8_t nr)
+{
+  if ((nr == 0) || (nr > 3)) return false;
+  uint8_t reg = getMode1();
+  if (nr == 1) return (reg & PCA9685_MODE1_SUB1) > 0;
+  if (nr == 2) return (reg & PCA9685_MODE1_SUB2) > 0;
+  return (reg & PCA9685_MODE1_SUB3) > 0;
+}
+
+
+bool PCA9685::setSubCallAddress(uint8_t nr, uint8_t address)
+{
+  if ((nr == 0) || (nr > 3)) return false;
+  writeReg(PCA9685_SUBADR(nr), address);
+  return true;
+}
+
+
+uint8_t PCA9685::getSubCallAddress(uint8_t nr)
+{
+  if ((nr == 0) || (nr > 3)) return 0;
+  uint8_t address = readReg(PCA9685_SUBADR(nr));
+  return address;
+}
+
+
+bool PCA9685::enableAllCall()
+{
+  uint8_t prev = getMode1();
+  uint8_t reg = prev | PCA9685_MODE1_ALLCALL;
+  //  only update if changed.
+  if (reg != prev) setMode1(reg);
+  return true;
+}
+
+
+bool PCA9685::disableAllCall()
+{
+  uint8_t prev = getMode1();
+  uint8_t reg = prev & ~PCA9685_MODE1_ALLCALL;
+  //  only update if changed.
+  if (reg != prev) setMode1(reg);
+  return true;
+}
+
+
+bool PCA9685::isEnabledAllCall()
+{
+  uint8_t reg = getMode1();
+  return reg & PCA9685_MODE1_ALLCALL;
+}
+
+
+bool PCA9685::setAllCallAddress(uint8_t address)
+{
+  writeReg(PCA9685_ALLCALLADR, address);
+  return true;
+}
+
+
+uint8_t PCA9685::getAllCallAddress()
+{
+  uint8_t address = readReg(PCA9685_ALLCALLADR);
+  return address;
+}
+
+
 
 
 //////////////////////////////////////////////////////////////
