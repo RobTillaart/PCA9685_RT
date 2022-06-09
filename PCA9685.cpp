@@ -2,7 +2,7 @@
 //    FILE: PCA9685.cpp
 //  AUTHOR: Rob Tillaart
 //    DATE: 24-apr-2016
-// VERSION: 0.3.4
+// VERSION: 0.4.0
 // PURPOSE: Arduino library for I2C PCA9685 16 channel PWM 
 //     URL: https://github.com/RobTillaart/PCA9685_RT
 //
@@ -18,49 +18,17 @@
 //  0.3.2  2021-01-14  WireN support
 //  0.3.3  2021-12-23  update library.json, license, readme, minor edits
 //  0.3.4  2022-01-03  add channelCount()
+//  0.4.0  2022-06-09  breaking changes (sync with pca9634)
+//                      rename reset() to configure()
+//                      add mode1 and mode2 parameter to configure.
+//                      add SUB CALL and ALL CALL functions.
+//                      update documentation.
+//                      renamed PCA9634_MODE2_STOP to PCA9634_MODE2_ACK
+//                      add mode parameters to begin()
 
 
 #include "PCA9685.h"
 
-
-// REGISTERS CONFIGURATION - check datasheet for details
-#define PCA9685_MODE1       0x00
-#define PCA9685_MODE2       0x01
-
-// MODE1 REGISTERS
-#define PCA9685_RESTART     0x80
-#define PCA9685_EXTCLK      0x40
-#define PCA9685_AUTOINCR    0x20
-#define PCA9685_SLEEP       0x10
-#define PCA9685_SUB1        0x08
-#define PCA9685_SUB2        0x04
-#define PCA9685_SUB3        0x02
-#define PCA9685_ALLCALL     0x01
-
-// MODE2 REGISTERS (see datasheet)
-#define PCA9685_INVERT      0x10
-#define PCA9685_OCH         0x08
-#define PCA9685_OUTDRV      0x04
-#define PCA9685_OUTNE       0x03
-
-// REGISTERS - CHANNELS
-#define PCA9685_CHANNEL_0   0x06   //  0x06 + 4*channel is base per channel
-
-// REGISTERS - FREQUENCY
-#define PCA9685_PRE_SCALER  0xFE
-
-// REGISTERS - Subaddressing I2C - not implemented
-#define PCA9685_SUBADR(x)   (0x01+(x))  // x = 1..3
-#define PCA9685_ALLCALLADR  0x05
-
-// REGISTERS - ALL_ON ALL_OFF - partly implemented
-#define PCA9685_ALL_ON_L    0xFA
-#define PCA9685_ALL_ON_H    0xFB
-#define PCA9685_ALL_OFF_L   0xFC
-#define PCA9685_ALL_OFF_H   0xFD   // used for allOFF()
-
-// NOT IMPLEMENTED YET
-#define PCA9685_TESTMODE    0xFF   // do not be use. see datasheet.
 
 
 //////////////////////////////////////////////////////////////
@@ -69,14 +37,15 @@
 //
 PCA9685::PCA9685(const uint8_t deviceAddress, TwoWire *wire)
 {
-  _address = deviceAddress;
-  _wire    = wire;
-  _error   = 0;
+  _address      = deviceAddress;
+  _wire         = wire;
+  _channelCount = 16;
+  _error        = 0;
 }
 
 
 #if defined (ESP8266) || defined(ESP32)
-bool PCA9685::begin(uint8_t sda, uint8_t scl)
+bool PCA9685::begin(uint8_t sda, uint8_t scl, uint8_t mode1_mask, uint8_t mode2_mask)
 {
   _wire = &Wire;
   if ((sda < 255) && (scl < 255))
@@ -86,17 +55,17 @@ bool PCA9685::begin(uint8_t sda, uint8_t scl)
     _wire->begin();
   }
   if (! isConnected()) return false;
-  reset();
+  configure(mode1_mask, mode2_mask);
   return true;
 }
 #endif
 
 
-bool PCA9685::begin()
+bool PCA9685::begin(uint8_t mode1_mask, uint8_t mode2_mask)
 {
   _wire->begin();
   if (! isConnected()) return false;
-  reset();
+  configure(mode1_mask, mode2_mask);
   return true;
 }
 
@@ -109,36 +78,37 @@ bool PCA9685::isConnected()
 }
 
 
-void PCA9685::reset()
+void PCA9685::configure(uint8_t mode1_mask, uint8_t mode2_mask)
 {
   _error = PCA9685_OK;
-  writeMode(PCA9685_MODE1, PCA9685_AUTOINCR | PCA9685_ALLCALL);
-  writeMode(PCA9685_MODE2, PCA9685_OUTDRV);
+
+  setMode1(mode1_mask);
+  setMode2(mode2_mask);
 }
 
 
-void PCA9685::writeMode(uint8_t reg, uint8_t value)
+uint8_t PCA9685::writeMode(uint8_t reg, uint8_t value)
 {
-  _error = PCA9685_OK;
-  if ((reg != PCA9685_MODE1) && (reg != PCA9685_MODE2))
+  if ((reg == PCA9685_MODE1) || (reg == PCA9685_MODE2))
   {
-    _error = PCA9685_ERR_MODE;
-    return;
+    writeReg(reg, value);
+    return PCA9685_OK;
   }
-  writeReg(reg, value);
+  _error = PCA9685_ERR_MODE;
+  return PCA9685_ERROR;
 }
 
 
 uint8_t PCA9685::readMode(uint8_t reg)
 {
-  _error = PCA9685_OK;
-  if ((reg != PCA9685_MODE1) && (reg != PCA9685_MODE2))
+  if ((reg == PCA9685_MODE1) || (reg == PCA9685_MODE2))
   {
-    _error = PCA9685_ERR_MODE;
-    return 0;
+    _error = PCA9685_OK;
+    uint8_t value = readReg(reg);
+    return value;
   }
-  uint8_t value = readReg(reg);
-  return value;
+  _error = PCA9685_ERR_MODE;
+  return PCA9685_ERROR;
 }
 
 
@@ -203,7 +173,7 @@ void PCA9685::setFrequency(uint16_t freq, int offset)
   uint8_t scaler = 48828 / (_freq * 8) - 1;
 
   uint8_t mode1 = readMode(PCA9685_MODE1);
-  writeMode(PCA9685_MODE1, mode1 | PCA9685_SLEEP);
+  writeMode(PCA9685_MODE1, mode1 | PCA9685_MODE1_SLEEP);
   scaler += offset;
   writeReg(PCA9685_PRE_SCALER, scaler);
   writeMode(PCA9685_MODE1, mode1);
