@@ -48,7 +48,7 @@ See PCA9685.h and datasheet for settings possible.
 
 ### Mode registers
 
-Used to configure the PCA963x general behaviour.
+Used to configure the PCA9685 general behaviour.
 
 - **uint8_t writeMode(uint8_t reg, uint8_t value)** configuration of one of the two configuration registers.
 Check datasheet for details.
@@ -66,9 +66,9 @@ useful to add or remove a single flag (bit masking).
 
 | Name                    | Value | Description                        |
 |:------------------------|:-----:|:-----------------------------------|
-| PCA9685_MODE1_AUTOINCR2 | 0x80  | Read Only, 0 = disable  1 = enable |
-| PCA9685_MODE1_AUTOINCR1 | 0x40  | Read Only, bit1                    |
-| PCA9685_MODE1_AUTOINCR0 | 0x20  | Read Only, bit0                    |
+| PCA9685_MODE1_RESTART   | 0x80  | 0 = disable       1 = enable       |
+| PCA9685_MODE1_EXTCLK    | 0x40  | 0 = internal      1 = external     |
+| PCA9685_MODE1_AUTOINCR  | 0x20  | 0 = disable       1 = enable       |
 | PCA9685_MODE1_SLEEP     | 0x10  | 0 = normal        1 = sleep        |
 | PCA9685_MODE1_SUB1      | 0x08  | 0 = disable       1 = enable       |
 | PCA9685_MODE1_SUB2      | 0x04  | 0 = disable       1 = enable       |
@@ -158,12 +158,15 @@ When using offset, the **getFrequency(false)** will return the adjusted **preSca
 
 ### SUB CALL and ALL CALL
 
+(new since 0.4.0)
+
 Please read the datasheet to understand the working of **SUB CALL** and **ALL CALL**.
 
 Since version 0.2.0 there is (experimental) support for the **SUB CALL** and **ALL CALL** functions.
 It needs more testing and if there are issues, please report.
 
 AllCall is automatically activated for each device on startup.
+
 
 #### Description
 
@@ -206,4 +209,6 @@ See examples
 - add unit tests (if possible)
 - investigate set/getFrequency int vs uint16_t ?
 - sync with PCA9634/35/85 where possible
+  - error handling?
+- investigate **PCA9685_TESTMODE**
 
