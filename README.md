@@ -211,5 +211,5 @@ See examples
   - **setFrequency(), getFrequency(), \_freq**
 - sync with PCA9634/35/85 where possible
   - error handling?
-- investigate **PCA9685_TESTMODE**
+
 

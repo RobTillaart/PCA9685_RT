@@ -65,7 +65,8 @@
 // REGISTERS - FREQUENCY
 #define PCA9685_PRE_SCALER          0xFE
 
-// NOT IMPLEMENTED YET
+//  NOT IMPLEMENTED
+//  WARNING: DO NOT USE THIS REGISTER (see datasheet)
 #define PCA9685_TESTMODE            0xFF   // do not be use. see datasheet.
 
 
