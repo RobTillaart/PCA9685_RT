@@ -208,7 +208,7 @@ See examples
 - improve documentation
 - add unit tests (if possible)
 - investigate int vs uint16_t ?
-  - **set/getFrequency() and \_freq*
+  - **setFrequency(), getFrequency(), \_freq**
 - sync with PCA9634/35/85 where possible
   - error handling?
 - investigate **PCA9685_TESTMODE**
