@@ -54,7 +54,9 @@
 #define PCA9685_ALLCALLADR          0x05
 
 // REGISTERS - CHANNELS
-#define PCA9685_CHANNEL_0           0x06   //  0x06 + 4*channel is base per channel
+//  0x06 + 4*channel is base per channel
+#define PCA9685_CHANNEL_0           0x06
+#define PCA9685_CHANNEL(x)          (0x06 + ((x) * 4))
 
 // REGISTERS - ALL_ON ALL_OFF - partly implemented
 #define PCA9685_ALL_ON_L            0xFA
@@ -130,7 +132,7 @@ public:
 
   /////////////////////////////////////////////////////
   //
-  // SUB CALL  -  ALL CALL  (since 0.2.0)
+  // SUB CALL  -  ALL CALL  (since 0.4.0)
   //
   //  nr = { 1, 2, 3 }
   bool     enableSubCall(uint8_t nr);

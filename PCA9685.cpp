@@ -125,7 +125,7 @@ void PCA9685::setPWM(uint8_t channel, uint16_t onTime, uint16_t offTime)
     return;
   }
   offTime &= 0x0FFFF;   // non-doc feature - to easy set figure 8 P.17
-  uint8_t reg = PCA9685_CHANNEL_0 + (channel << 2);
+  uint8_t reg = PCA9685_CHANNEL(channel);;
   writeReg2(reg, onTime, offTime);
 }
 
@@ -146,7 +146,7 @@ void PCA9685::getPWM(uint8_t channel, uint16_t* onTime, uint16_t* offTime)
     _error = PCA9685_ERR_CHANNEL;
     return;
   }
-  uint8_t reg = PCA9685_CHANNEL_0 + (channel << 2);
+  uint8_t reg = PCA9685_CHANNEL(channel);
   _wire->beginTransmission(_address);
   _wire->write(reg);
   _error = _wire->endTransmission();
@@ -208,7 +208,7 @@ void PCA9685::digitalWrite(uint8_t channel, uint8_t mode)
     _error = PCA9685_ERR_CHANNEL;
     return;
   }
-  uint8_t reg = PCA9685_CHANNEL_0 + (channel << 2);
+  uint8_t reg = PCA9685_CHANNEL(channel);
   if (mode != LOW) writeReg2(reg, 0x1000, 0x0000);
   else writeReg2(reg, 0x0000, 0x0000);
 }
