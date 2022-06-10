@@ -125,7 +125,7 @@ void PCA9685::setPWM(uint8_t channel, uint16_t onTime, uint16_t offTime)
     return;
   }
   offTime &= 0x0FFFF;   // non-doc feature - to easy set figure 8 P.17
-  uint8_t reg = PCA9685_CHANNEL(channel);;
+  uint8_t reg = PCA9685_CHANNEL(channel);
   writeReg2(reg, onTime, offTime);
 }
 

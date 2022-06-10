@@ -50,13 +50,13 @@
 #define PCA9685_MODE2_NONE          0x00
 
 //  (since 0.4.0)
-#define PCA9685_SUBADR(x)           (0x01 +(x))  // x = 1..3
+#define PCA9685_SUBADR(x)           (0x01 + (x))  //  x = 1..3
 #define PCA9685_ALLCALLADR          0x05
 
 // REGISTERS - CHANNELS
 //  0x06 + 4*channel is base per channel
 #define PCA9685_CHANNEL_0           0x06
-#define PCA9685_CHANNEL(x)          (0x06 + ((x) * 4))
+#define PCA9685_CHANNEL(x)          (0x06 + ((x) * 4))  //  x = 0..15
 
 // REGISTERS - ALL_ON ALL_OFF - partly implemented
 #define PCA9685_ALL_ON_L            0xFA
