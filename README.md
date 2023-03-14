@@ -198,6 +198,34 @@ The functions to enable all/sub-addresses are straightforward:
 - **uint8_t getAllCallAddress()**
 
 
+#### I2C Software reset (experimental)
+
+The goal of this function is to reset ALL PCA9685 devices on the bus.
+When using the software reset, ALL devices attached to the bus are set to their hardware startup conditions.
+Generally, there are multiple definitions of software resets by the I2C inventor NXP.
+To accommodate this, two different modes for this function have been defined and tested (See PCA9634).
+
+- Method 1 is a tested method which is specific to the PCA9634.
+Since the number of different types of I2C chips is very large, side-effects on other chips might be possible.
+Before using this method, consult the data sheets of all chips on the bus to mitigate potential undefined states.
+- Method 0 is a somewhat “general” method which resets many chips on the I2C-bus.
+However, this method DOES NOT reset the PCA9685 chip.
+Therefore, consult the data sheet of all different chips on the bus to mitigate potential undefined states.
+
+When only working with PCA9685 chips on a bus, only method 1 is required.
+
+```cpp
+ledArray.I2C_SoftwareReset(1);  //  for method 1
+ledArray.I2C_SoftwareReset(0);  //  for method 0
+```
+
+In case you experience issues with this function on your chips (non-PCA9685),
+please give feedback, so the documentation can be improved.
+
+For further details of the development, see - #10 (PCA9634 repo)
+
+
+
 ## Operation
 
 See examples

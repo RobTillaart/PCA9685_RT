@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - add example **PCA9685_OE_control.ino**
 - update unit test.
 - **configure()** now returns error state
+- add I2C_SoftwareReset()
 - moved code from .h to .cpp
 - update readme.md
 - update GitHub actions
