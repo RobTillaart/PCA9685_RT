@@ -198,7 +198,31 @@ The functions to enable all/sub-addresses are straightforward:
 - **uint8_t getAllCallAddress()**
 
 
-#### I2C Software reset (experimental)
+#### OutputEnable
+
+Since 0.2.6 (experimental) support to control the OE (Output Enable) pin of the PCA9634.
+This OE pin can control all LEDs simultaneously. 
+It also allows to control multiple PCA9634 modules by connecting the OE pins.
+Think of simultaneous switching ON/OFF or get dimming with a high frequency PWM.
+Or use 2 modules alternatively by placing an inverter in between.
+
+See datasheet for the details
+
+- **bool setOutputEnablePin(uint8_t pin = 255)** sets the IO pin to connect to the OE pin of the PCA9634.
+A value of 255 indicates no pin set/selected.
+Sets the OE pin to HIGH.
+Returns true on success.
+- **bool setOutputEnable(uint8_t value)** Sets the OE pin HIGH or LOW.
+All non zero values are LOW.
+Returns true on success.
+- **uint8_t getOutputEnable()** get the current value of the OE pin.
+If pin is not set/selected it will return HIGH.
+
+Note: the OE is LOW active. 
+The user has to set the power on value by means of a PULL DOWN resistor.
+
+
+#### I2C Software reset
 
 The goal of this function is to reset ALL PCA9685 devices on the bus.
 When using the software reset, ALL devices attached to the bus are set to their hardware startup conditions.
