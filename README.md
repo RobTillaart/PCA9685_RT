@@ -6,7 +6,7 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/RobTillaart/PCA9685_RT/blob/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/RobTillaart/PCA9685_RT.svg?maxAge=3600)](https://github.com/RobTillaart/PCA9685_RT/releases)
-[![PlatformIO Registry](https://badges.registry.platformio.org/packages/robtillaart/library/PCA9685_RT.svg)](https://registry.platformio.org/libraries/robtillaart/PCA9685)
+[![PlatformIO Registry](https://badges.registry.platformio.org/packages/robtillaart/library/PCA9685.svg)](https://registry.platformio.org/libraries/robtillaart/PCA9685)
 
 
 # PCA9685_RT
