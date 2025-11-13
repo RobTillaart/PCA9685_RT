@@ -3,7 +3,7 @@
 //    FILE: PCA9685.h
 //  AUTHOR: Rob Tillaart
 //    DATE: 24-apr-2016
-// VERSION: 0.7.2
+// VERSION: 0.7.3
 // PURPOSE: Arduino library for PCA9685 I2C LED driver, 16 channel PWM, 12 bit.
 //     URL: https://github.com/RobTillaart/PCA9685_RT
 
@@ -12,7 +12,7 @@
 #include "Wire.h"
 
 
-#define PCA9685_LIB_VERSION         (F("0.7.2"))
+#define PCA9685_LIB_VERSION         (F("0.7.3"))
 
 // ERROR CODES
 #define PCA9685_OK                  0x00
@@ -132,10 +132,7 @@ public:
   //
   //  set channel  HIGH or LOW (effectively no PWM)
   uint8_t  write1(uint8_t channel, uint8_t mode);
-
-  //  for backwards compatibility; will be removed in future
-  uint8_t  setON(uint8_t channel)   { return write1(channel, HIGH); };
-  uint8_t  setOFF(uint8_t channel)  { return write1(channel, LOW); };
+  uint8_t  read1(uint8_t channel);
 
   uint8_t  allOFF();
 
@@ -192,7 +189,14 @@ public:
   //
   [[deprecated("use setMode1(value) or setMode2(value) instead")]]
   uint8_t  writeMode(uint8_t reg, uint8_t value);
+  [[deprecated("use getMode1() or getMode2() instead")]]
   uint8_t  readMode(uint8_t reg);
+
+  //  for backwards compatibility; will be removed in future
+  [[deprecated("use write1(uint8_t channel, uint8_t mode) instead")]]
+  uint8_t  setON(uint8_t channel)   { return write1(channel, HIGH); };
+  [[deprecated("use write1(uint8_t channel, uint8_t mode) instead")]]
+  uint8_t  setOFF(uint8_t channel)  { return write1(channel, LOW); };
 
 
 private:

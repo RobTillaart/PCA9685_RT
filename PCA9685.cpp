@@ -2,7 +2,7 @@
 //    FILE: PCA9685.cpp
 //  AUTHOR: Rob Tillaart
 //    DATE: 24-apr-2016
-// VERSION: 0.7.2
+// VERSION: 0.7.3
 // PURPOSE: Arduino library for PCA9685 I2C LED driver, 16 channel PWM, 12 bit.
 //     URL: https://github.com/RobTillaart/PCA9685_RT
 
@@ -228,6 +228,56 @@ uint8_t PCA9685::write1(uint8_t channel, uint8_t mode)
   if (mode != LOW) return writeRegister2(reg, 0x1000, 0x0000);
   return writeRegister2(reg, 0x0000, 0x0000);
 }
+
+
+//
+//  FIX #29
+//  TODO - verify datasheet
+//  TODO - update PCA9685_test02.ino
+//  TODO - split off LOW LEVEL IO
+//         value = readRegister(reg, ....)
+//
+uint8_t PCA9685::read1(uint8_t channel)
+{
+  _error = PCA9685_OK;
+  if (channel >= _channelCount)
+  {
+    _error = PCA9685_ERR_CHANNEL;
+    return _error;
+  }
+
+  uint8_t reg = PCA9685_CHANNEL(channel);
+
+  _wire->beginTransmission(_address);
+  _wire->write(reg);
+  _error = _wire->endTransmission();
+  if (_error != 0)
+  {
+    _error = PCA9685_ERR_I2C;
+    return _error;
+  }
+
+  if (_wire->requestFrom(_address, (uint8_t)4) != 4)
+  {
+    _error = PCA9685_ERR_I2C;
+    return _error;
+  }
+
+  uint8_t onL  = _wire->read();
+  uint8_t onH  = _wire->read();
+  uint8_t offL = _wire->read();
+  uint8_t offH = _wire->read();
+
+  if (onH & 0x10) return HIGH;  // FULL_ON
+  if (offH & 0x10) return LOW;  // FULL_OFF
+
+  return 2;
+}
+
+
+
+
+
 
 
 uint8_t PCA9685::allOFF()

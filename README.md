@@ -163,10 +163,14 @@ read back the configuration of the channel.
 - **uint8_t allOFF()** switches all PWM channels OFF. **Experimental** in 0.3.0.
 To "undo" the allOFF one can call the **reset()** function and set all 
 PWM channels again.
-- **uint8_t write1(channel, mode)** mode = HIGH or LOW, just use the PCA9685 as 
-a digital pin, write 1 bit.
-This single function replaces the setON() and setOFF() that will become
+- **uint8_t write1(uint8_t channel, uint8_t mode)** mode = HIGH or LOW, just use the PCA9685 as 
+a digital pin, write 1 bit. Returns PCA9685_OK or error code.
+This single write1() function replaces the setON() and setOFF() that will become
 obsolete in the future.
+
+** fix #29 experimental**
+- **uint8_t read1(uint8_t channel)** reads the status of the digital pin.
+Can return { LOW = 0, HIGH = 1, other = 2 } or error code 
 
 
 ### Frequency 
