@@ -112,7 +112,7 @@ Obsolete in near future, use functions above as those are less error prone.
 
 ### Constants for mode registers
 
-|  Name                     |  Value  |  Description                         |
+|  MODE1 names              |  Value  |  Description                         |
 |:--------------------------|:-------:|:-------------------------------------|
 |  PCA9685_MODE1_RESTART    |  0x80   |  0 = disable       1 = enable        |
 |  PCA9685_MODE1_EXTCLK     |  0x40   |  0 = internal      1 = external      |
@@ -123,7 +123,10 @@ Obsolete in near future, use functions above as those are less error prone.
 |  PCA9685_MODE1_SUB3       |  0x02   |  0 = disable       1 = enable        |
 |  PCA9685_MODE1_ALLCALL    |  0x01   |  0 = disable       1 = enable        |
 |  PCA9685_MODE1_NONE       |  0x00   |                                      |
-|  ----                     |         |                                      |
+
+
+|  MODE2  names             |  Value  |  Description                         |
+|:--------------------------|:-------:|:-------------------------------------|
 |  PCA9685_MODE2_INVERT     |  0x10   |  0 = normal        1 = inverted      |
 |  PCA9685_MODE2_STOP       |  0x08   |  0 = on STOP       1 = on ACK        |
 |  PCA9685_MODE2_TOTEMPOLE  |  0x04   |  0 = open drain    1 = totem-pole    |
@@ -170,9 +173,9 @@ a digital pin, write 1 bit. Returns PCA9685_OK or error code.
 This single write1() function replaces the setON() and setOFF() that will become
 obsolete in the future.
 
-** fix #29 experimental**
+**fix #29 experimental**
 - **uint8_t read1(uint8_t channel)** reads the status of the digital pin.
-Can return { LOW = 0, HIGH = 1, other = 2 } or error code.
+Can return { LOW = 0, HIGH = 1, other = 2 } or an error code.
 
 
 ### Frequency 
@@ -211,6 +214,8 @@ When using offset, the **getFrequency(false)** will return the adjusted **preSca
 |  PCA9685_ERR_MODE    |   0xFD  |  Invalid mode
 |  PCA9685_ERR_I2C     |   0xFC  |  I2C communication error
 
+Be sure to check **lastError()** for possible errors if you want robustness.
+
 
 ## SUB CALL and ALL CALL
 
@@ -239,11 +244,15 @@ Typically there is only one such group but one can configure more of them by app
 
 The functions to enable all/sub-addresses are straightforward:
 
+SubCall functions:
+
 - **bool enableSubCall(uint8_t nr)** nr = 1,2,3
 - **bool disableSubCall(uint8_t nr)** nr = 1,2,3
 - **bool isEnabledSubCall(uint8_t nr)** nr = 1,2,3
 - **bool setSubCallAddress(uint8_t nr, uint8_t address)**
 - **uint8_t getSubCallAddress(uint8_t nr)**
+
+AllCall functions:
 
 - **bool enableAllCall()**
 - **bool disableAllCall()**
@@ -316,7 +325,7 @@ For further details of the development, see - #10 (PCA9634 repo)
 - improve error handling
   - return values etc.
   - documentation.
-- #defines ==> const uint16_t ? (not possible for all)
+- #defines ==> const uint16_t ? (not possible for all defines)
 
 
 #### Could
