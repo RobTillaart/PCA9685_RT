@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.7.3] - 2025-11-13
 - fix #29, add read1()
+- fix mask in setPWM()
+- refactored getPWM()
 - update GitHub actions
 - made some functions explicit deprecated.
 - update examples

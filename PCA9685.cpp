@@ -139,9 +139,10 @@ uint8_t PCA9685::setPWM(uint8_t channel, uint16_t onTime, uint16_t offTime)
     _error = PCA9685_ERR_CHANNEL;
     return _error;
   }
-  offTime &= 0x0FFFF;   //  non-doc feature - to easy set figure 8 P.17
   uint8_t reg = PCA9685_CHANNEL(channel);
-  return writeRegister2(reg, onTime, offTime);
+  //  mask both onTime and offTime to be in range 0..4095
+  //  allows to set the FULL_ON / FULL OFF bits.
+  return writeRegister2(reg, onTime & 0x1FFF, offTime & 0x1FFF);
 }
 
 
@@ -153,6 +154,7 @@ uint8_t PCA9685::setPWM(uint8_t channel, uint16_t offTime)
 
 
 //  read value from single PWM channel
+//  may include FULL_ON or FULL_OFF bit.
 uint8_t PCA9685::getPWM(uint8_t channel, uint16_t* onTime, uint16_t* offTime)
 {
   _error = PCA9685_OK;
@@ -162,19 +164,7 @@ uint8_t PCA9685::getPWM(uint8_t channel, uint16_t* onTime, uint16_t* offTime)
     return _error;
   }
   uint8_t reg = PCA9685_CHANNEL(channel);
-  _wire->beginTransmission(_address);
-  _wire->write(reg);
-  _error = _wire->endTransmission();
-  if (_wire->requestFrom(_address, (uint8_t)4) != 4)
-  {
-    _error = PCA9685_ERR_I2C;
-    return _error;
-  }
-  uint16_t _data = _wire->read();
-  *onTime = (_wire->read() * 256) + _data;
-  _data = _wire->read();
-  *offTime = (_wire->read() * 256) + _data;
-  return _error;
+  return readRegister2(reg, onTime, offTime);
 }
 
 
@@ -199,8 +189,8 @@ uint8_t PCA9685::setFrequency(uint16_t freq, int offset)
 }
 
 
-//  returns the actual used frequency.
-//  therefore it does not use offset
+//  cache == false returns the actual used frequency.
+//  cache == true returns the frequency without pre-scaler (offset).
 uint16_t PCA9685::getFrequency(bool cache)
 {
   _error = PCA9685_OK;
@@ -230,13 +220,7 @@ uint8_t PCA9685::write1(uint8_t channel, uint8_t mode)
 }
 
 
-//
-//  FIX #29
-//  TODO - verify datasheet
-//  TODO - update PCA9685_test02.ino
-//  TODO - split off LOW LEVEL IO
-//         value = readRegister(reg, ....)
-//
+//  See #29 for discussion.
 uint8_t PCA9685::read1(uint8_t channel)
 {
   _error = PCA9685_OK;
@@ -248,36 +232,17 @@ uint8_t PCA9685::read1(uint8_t channel)
 
   uint8_t reg = PCA9685_CHANNEL(channel);
 
-  _wire->beginTransmission(_address);
-  _wire->write(reg);
-  _error = _wire->endTransmission();
-  if (_error != 0)
-  {
-    _error = PCA9685_ERR_I2C;
-    return _error;
-  }
+  uint16_t on, off;
+  if (readRegister2(reg, &on, &off) != PCA9685_OK) return 2;
+  if (on  & 0x1000) return HIGH;  //  FULL_ON
+  if (off & 0x1000) return LOW;   //  FULL_OFF
 
-  if (_wire->requestFrom(_address, (uint8_t)4) != 4)
-  {
-    _error = PCA9685_ERR_I2C;
-    return _error;
-  }
+  uint16_t duty = (off - on) & 0x0FFF;
+  if (duty == 4095) return HIGH;  //  PWM = 100%
+  if (duty == 0)    return LOW;   //  PWM = 0%
 
-  uint8_t onL  = _wire->read();
-  uint8_t onH  = _wire->read();
-  uint8_t offL = _wire->read();
-  uint8_t offH = _wire->read();
-
-  if (onH & 0x10) return HIGH;  // FULL_ON
-  if (offH & 0x10) return LOW;  // FULL_OFF
-
-  return 2;
+  return 2;  //  not HIGH not LOW => use getPWM() to get PWM value.
 }
-
-
-
-
-
 
 
 uint8_t PCA9685::allOFF()
@@ -529,6 +494,7 @@ uint8_t PCA9685::readRegister(uint8_t reg)
   _wire->beginTransmission(_address);
   _wire->write(reg);
   _error = _wire->endTransmission();
+  if (_error != PCA9685_OK) return 0;
 
   if (_wire->requestFrom(_address, (uint8_t)1) != 1)
   {
@@ -537,6 +503,27 @@ uint8_t PCA9685::readRegister(uint8_t reg)
   }
   _error = PCA9685_OK;
   return _wire->read();
+}
+
+
+int PCA9685::readRegister2(uint8_t reg, uint16_t * v1, uint16_t * v2)
+{
+  _wire->beginTransmission(_address);
+  _wire->write(reg);
+  _error = _wire->endTransmission();
+  if (_error != PCA9685_OK) return _error;
+
+  if (_wire->requestFrom(_address, (uint8_t)4) != 4)
+  {
+    _error = PCA9685_ERR_I2C;
+    return _error;
+  }
+  uint16_t data = _wire->read();
+  *v1 = (_wire->read() * 256) + data;
+  data = _wire->read();
+  *v2 = (_wire->read() * 256) + data;
+  _error = PCA9685_OK;
+  return _error;
 }
 
 

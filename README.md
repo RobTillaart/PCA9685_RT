@@ -157,9 +157,11 @@ The signal is divided in 4096 steps, 0..4095.
 The pulse can begin **onTime** on any step and it can stop on any step **offTime**.
 This allows e.g. to distribute the power over the 16 channels, e.g. the
 channels do not need to start at the same moment with HIGH.
+The values 4096 allows to set the FULL_ON or FULL OFF bit.
 - **uint8_t setPWM(uint8_t channel, offTime)** simple PWM that always start on **onTime = 0**.
 - **uint8_t getPWM(uint8_t channel, uint16_t \* onTime, uint16_t \* offTime)** 
 read back the configuration of the channel.
+Note the values may include the FULL ON / FULL OFF bit (0x1000).
 - **uint8_t allOFF()** switches all PWM channels OFF. **Experimental** in 0.3.0.
 To "undo" the allOFF one can call the **reset()** function and set all 
 PWM channels again.
@@ -170,7 +172,7 @@ obsolete in the future.
 
 ** fix #29 experimental**
 - **uint8_t read1(uint8_t channel)** reads the status of the digital pin.
-Can return { LOW = 0, HIGH = 1, other = 2 } or error code 
+Can return { LOW = 0, HIGH = 1, other = 2 } or error code.
 
 
 ### Frequency 
@@ -189,7 +191,7 @@ After changing the frequency, one must set all channels (again),
 so one should set the frequency in **setup()**
 
 The parameter offset can be used to tune the **preScaler** to get a frequency
-closer to the requested value. See **PCA9685_setFrequency_offset** example. 
+closer to the requested value. See **PCA9685_setFrequency_offset.ino** example. 
 Default the offset = 0. As the **preScaler** is smaller at higher frequencies 
 higher frequencies are less accurate.
 Making offset too large can result in very incorrect frequencies.
@@ -314,7 +316,8 @@ For further details of the development, see - #10 (PCA9634 repo)
 - improve error handling
   - return values etc.
   - documentation.
-- #defines ==> const int?
+- #defines ==> const uint16_t ? (not possible for all)
+
 
 #### Could
 
@@ -322,6 +325,7 @@ For further details of the development, see - #10 (PCA9634 repo)
 - unit tests
 - investigate int vs uint16_t ?
   - **setFrequency(), getFrequency(), \_freq**
+- need for an **allON()** function?
 
 #### Wont
 
